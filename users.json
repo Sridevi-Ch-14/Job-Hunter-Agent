@@ -1,0 +1,28 @@
+[
+  {
+    "name": "full name of the person",
+    "email": "harideeprepakula@gmail.com",
+    "phone": "",
+    "linkedin": "",
+    "skills": [
+      "Generative AI & NLP",
+      "Machine Learning & CV"
+    ],
+    "education": "Bachelor of Technology in Computer Science Engineering - CGPA 7.58 Sep. 2022 - Present",
+    "graduation_year": 2025,
+    "experience_years": 10,
+    "preferred_roles": [
+      "AI Business Decision Intelligence System",
+      "AI Skincare Recommendation"
+    ],
+    "preferred_locations": [
+      "India",
+      null,
+      null
+    ],
+    "active": true,
+    "created_at": "2026-04-02T11:52:03.301368",
+    "internship_months": 24,
+    "looking_for": "Full-time Job or Internship or Both"
+  }
+]

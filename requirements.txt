@@ -1,0 +1,13 @@
+# AI Job Hunter Agent — Requirements
+
+playwright          # browser automation
+beautifulsoup4      # HTML parsing
+requests            # HTTP requests (Telegram API)
+lxml                # fast HTML/XML parser
+google-generativeai # Google Gemini API (free AI)
+python-dotenv       # load .env file
+supabase            # free PostgreSQL database
+streamlit           # dashboard (free hosting)
+pandas              # data manipulation
+schedule            # local task scheduler
+pypdf               # PDF resume parsing

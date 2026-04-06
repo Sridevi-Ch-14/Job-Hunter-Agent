@@ -1,0 +1,109 @@
+name: AI Job Hunter
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # scrape + filter + email + telegram every 10 min
+    - cron: "30 3 * * *"     # follow-up check once daily (9 AM IST)
+  workflow_dispatch:          # manual trigger from GitHub UI
+
+jobs:
+
+  # ── Job 1: Scrape → Filter → Email → Telegram ─────────────────────────────
+  scrape_and_notify:
+    name: Scrape, Filter, Email & Telegram
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium --with-deps
+
+      - name: Create .env from secrets
+        run: |
+          cat > .env << ENVEOF
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          EMAIL_ADDRESS=${{ secrets.EMAIL_ADDRESS }}
+          EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+          RECIPIENT_EMAIL=${{ secrets.RECIPIENT_EMAIL }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
+          YOUR_NAME=${{ secrets.YOUR_NAME }}
+          YOUR_PHONE=${{ secrets.YOUR_PHONE }}
+          YOUR_LINKEDIN=${{ secrets.YOUR_LINKEDIN }}
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+          ENVEOF
+
+      - name: Scrape all platforms
+        run: python agents/scraper_manager.py
+
+      - name: AI Filter
+        run: python agents/filter_agent.py
+
+      - name: Auto Apply Agent # <--- ADD THIS STEP
+        run: python agents/apply_agent.py
+
+      - name: Email alert
+        run: python agents/email_agent.py
+
+      - name: Telegram alert
+        run: python agents/telegram_agent.py
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: job-results-${{ github.run_number }}
+          path: |
+            scraped_jobs.json
+            filtered_jobs.json
+          retention-days: 7
+
+  # ── Job 2: Follow-up Check (daily) ────────────────────────────────────────
+  followup_check:
+    name: Daily Follow-up Check
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '30 3 * * *'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create .env from secrets
+        run: |
+          cat > .env << ENVEOF
+          EMAIL_ADDRESS=${{ secrets.EMAIL_ADDRESS }}
+          EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+          RECIPIENT_EMAIL=${{ secrets.RECIPIENT_EMAIL }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
+          YOUR_NAME=${{ secrets.YOUR_NAME }}
+          YOUR_PHONE=${{ secrets.YOUR_PHONE }}
+          YOUR_LINKEDIN=${{ secrets.YOUR_LINKEDIN }}
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+          ENVEOF
+
+      - name: Download latest job results
+        uses: actions/download-artifact@v4
+        with:
+          name: job-results-${{ github.run_number }}
+        continue-on-error: true
+
+      - name: Run Follow-up Agent
+        run: python agents/followup_agent.py
