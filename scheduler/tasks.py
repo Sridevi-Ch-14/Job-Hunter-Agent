@@ -5,7 +5,7 @@ Usage:
   python scheduler/tasks.py
 
 Schedule:
-  - Scrape all platforms + Filter + Email + Telegram : every 30 minutes
+  - Scrape all platforms + Filter + Email : every 30 minutes
   - Follow-up check                                  : daily at 9:00 AM
 """
 
@@ -25,7 +25,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "agents"))
 from scraper_manager import run_all_scrapers
 from filter_agent    import run_filter_agent
 from email_agent     import run_email_agent
-from telegram_agent  import run_telegram_agent
 from followup_agent  import run_followup_agent
 
 logging.basicConfig(
@@ -59,16 +58,10 @@ def run_full_pipeline():
         return
 
     try:
-        log.info("Step 3/4 — Email Agent")
+        log.info("Step 3/3 — Email Agent")
         run_email_agent()
     except Exception as e:
         log.error(f"❌ Email failed: {e}")
-
-    try:
-        log.info("Step 4/4 — Telegram Agent")
-        run_telegram_agent()
-    except Exception as e:
-        log.error(f"❌ Telegram failed: {e}")
 
     log.info("✅ PIPELINE COMPLETE\n")
 
@@ -88,7 +81,7 @@ schedule.every().day.at("09:00").do(run_followup)
 if __name__ == "__main__":
     log.info("🤖 AI Job Hunter Scheduler started")
     log.info("   Pipeline  : every 30 min (Naukri + Internshala + Indeed + LinkedIn)")
-    log.info("   Alerts    : Email + Telegram")
+    log.info("   Alerts    : Email")
     log.info("   Follow-up : daily at 09:00 AM")
     log.info("   Press Ctrl+C to stop\n")
 

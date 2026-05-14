@@ -2,7 +2,7 @@
 
 playwright          # browser automation
 beautifulsoup4      # HTML parsing
-requests            # HTTP requests (Telegram API)
+requests            # HTTP requests
 lxml                # fast HTML/XML parser
 google-generativeai # Google Gemini API (free AI)
 python-dotenv       # load .env file
